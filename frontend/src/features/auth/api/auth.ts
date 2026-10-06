@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { queryClient } from "@/lib/queryClient";
 
 interface LoginRequest {
   email: string;
@@ -46,11 +47,14 @@ export function useRegister() {
 export function useLogout() {
   return useMutation({
     mutationFn: async () => {
-      await api.post("/auth/logout");
+      await api.post("/auth/logout", {
+        refresh_token: localStorage.getItem("refresh_token"),
+      });
     },
     onSuccess: () => {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
+      queryClient.clear();
     },
   });
 }

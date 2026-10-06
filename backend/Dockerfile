@@ -1,18 +1,19 @@
-FROM python:3.12-slim
+FROM python:3.12-slim AS builder
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
 
+FROM python:3.12-slim
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+RUN addgroup --system appgroup && adduser --system --group appuser
 
-# Install Python dependencies
+COPY --from=builder /app/wheels /wheels
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache /wheels/* && rm -rf /wheels
 
-# Copy application code
-COPY . .
+COPY --chown=appuser:appgroup . .
 
-# Run migrations and start server
+USER appuser
 CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
