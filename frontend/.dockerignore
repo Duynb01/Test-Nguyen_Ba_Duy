@@ -1,0 +1,7 @@
+node_modules/
+dist/
+build/
+.npm/
+playwright-report/
+test-results/
+.git/
