@@ -17,10 +17,8 @@ depends_on = None
 
 
 def upgrade():
-    op.create_index(op.f('ix_todos_user_id'), 'todos', ['user_id'], unique=False)
-    op.create_index(op.f('ix_todos_created_at'), 'todos', ['created_at'], unique=False)
+    op.create_index('ix_todos_user_id_created_at', 'todos', ['user_id', 'created_at'], unique=False)
 
 
 def downgrade():
-    op.drop_index(op.f('ix_todos_created_at'), table_name='todos')
-    op.drop_index(op.f('ix_todos_user_id'), table_name='todos')
+    op.drop_index('ix_todos_user_id_created_at', table_name='todos')
